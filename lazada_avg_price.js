@@ -14,15 +14,18 @@
         // "l": 1000,
 
         // ชนิดของสำลี
-        "แผ่น": 1,
+        // "แผ่น": 1,
 
+        // ชนิดของเลย์
+        "แพ็ค" : 1,
     }
     const unitPriceOfProduct = ["฿"]
     const unitPriceFilterOutOfProduct = ["discount", "save"]
     // const titleOfProductsContain = ["nutella", "nutella", "นูเทลล่า", "นูเทล", "โกแลต"]
     // const titleOfProductsContain = ["macbook pro", "512"]
     // const titleOfProductsContain = ["ตู้เย็น" ,"4 ประตู" , "4 door"]
-    const titleOfProductsContain = ["เช็ดหน้า"]
+    // const titleOfProductsContain = ["เช็ดหน้า"]
+    const titleOfProductsContain = ["lay"]
     const PRODUCTS = [];
     const PRODUCTSNOTFOUND = [];
     const PRODUCTBESTPRICE = [];
