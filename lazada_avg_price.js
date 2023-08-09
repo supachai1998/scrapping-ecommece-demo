@@ -2,7 +2,7 @@
     const configDebug = {
         "lookingForUnitInName": false,
         "beatifulPrice": false,
-        "UNITALWAYSONE": false,
+        "UNITALWAYSONE": true,
     }
     const unitOfProduct = {
         // "kg": 1000,
@@ -25,7 +25,8 @@
     // const titleOfProductsContain = ["macbook pro", "512"]
     // const titleOfProductsContain = ["ตู้เย็น" ,"4 ประตู" , "4 door"]
     // const titleOfProductsContain = ["เช็ดหน้า"]
-    const titleOfProductsContain = ["lay"]
+    // const titleOfProductsContain = ["lay"]
+    const titleOfProductsContain = ["iphone"]
     const PRODUCTS = [];
     const PRODUCTSNOTFOUND = [];
     const PRODUCTBESTPRICE = [];
