@@ -2,22 +2,27 @@
     const configDebug = {
         "lookingForUnitInName": false,
         "beatifulPrice": false,
-        "UNITALWAYSONE": true,
+        "UNITALWAYSONE": false,
     }
     const unitOfProduct = {
-        "kg": 1000,
-        "g": 1,
-        "กิโลกรัม": 1000,
-        "กรัม": 1,
+        // "kg": 1000,
+        // "g": 1,
+        // "กิโลกรัม": 1000,
+        // "กรัม": 1,
         // "ml": 1,
         // "ลิตร": 1000,
         // "l": 1000,
+
+        // ชนิดของสำลี
+        "แผ่น": 1,
+
     }
     const unitPriceOfProduct = ["฿"]
     const unitPriceFilterOutOfProduct = ["discount", "save"]
     // const titleOfProductsContain = ["nutella", "nutella", "นูเทลล่า", "นูเทล", "โกแลต"]
     // const titleOfProductsContain = ["macbook pro", "512"]
-    const titleOfProductsContain = ["ตู้เย็น" ,"4 ประตู" , "4 door"]
+    // const titleOfProductsContain = ["ตู้เย็น" ,"4 ประตู" , "4 door"]
+    const titleOfProductsContain = ["เช็ดหน้า"]
     const PRODUCTS = [];
     const PRODUCTSNOTFOUND = [];
     const PRODUCTBESTPRICE = [];
@@ -173,9 +178,10 @@
                 value = 1;
                 unit = 1;
             } else {
-                const { value, unit } = lookingForUnitInName(title);
-                value = value;
-                unit = unit;
+                const { _value, _unit } = lookingForUnitInName(title);
+                value = _value;
+                unit = _unit;
+                if(configDebug.lookingForUnitInName)console.log(_value,value, _unit,unit)
             }
             if (unit == -1 || value == -1 || IsNaN(value) || IsNaN(unit)) {
                 console.log("ไม่เจอหน่วยหรือค่า", title, element.href)
@@ -206,6 +212,7 @@
         let isFound = false;
         let value = -1;
         // หาหน่วย
+        if (configDebug.lookingForUnitInName) console.log("elementArray", nameArray)
         for (let i = 0; i < nameArray.length; i++) {
             const element = nameArray[i];
             for (const key in unitOfProduct) {
@@ -218,7 +225,7 @@
                     foundUnitIndex = i;
                     // split key from element
                     const elementArray = element.split(key);
-                    if (configDebug.lookingForUnitInName) console.log("elementArray", elementArray)
+                    // if (configDebug.lookingForUnitInName) console.log("elementArray", elementArray)
                     if (ParseIntOrFloat(elementArray[0]) > 0) {
                         value = ParseIntOrFloat(elementArray[0]);
                         isFound = true;
@@ -232,11 +239,41 @@
 
                     break;
                 }
+                for (let i = 0; i < nameArray.length; i++) {
+                    for (const key in unitOfProduct) {
+                        if (nameArray[i].includes(key)) {
+                            foundUnitIndex = i;
+                        }
+                    }
+                    if (foundUnitIndex != -1) {
+                        break;
+                    }
+                }
+
+            }
+        }
+        if (foundUnitIndex != -1) {
+            // ถ้าเจอหน่วยให้หาตัวเลขทางซ้ายหรือขวา แค่ 1 ตำแหน่ง
+            if (foundUnitIndex > 0) {
+                if (ParseIntOrFloat(nameArray[foundUnitIndex - 1]) > 0) {
+                    value = ParseIntOrFloat(nameArray[foundUnitIndex - 1]);
+                    isFound = true;
+
+                }
+            }
+            if (!isFound) {
+                if (foundUnitIndex < nameArray.length - 1) {
+                    if (ParseIntOrFloat(nameArray[foundUnitIndex + 1]) > 0) {
+                        value = ParseIntOrFloat(nameArray[foundUnitIndex + 1]);
+                        isFound = true;
+                    }
+                }
             }
         }
         if (isFound) {
             value = value * unitOfProduct[unit];
-            return { value, unit };
+            console.log("return-->",value, unit, nameArray)
+            return { _value:value, _unit:unit };
         }
         // ex. name is โปรสุดคุ้ม (แพ็คคู่) Nutella Spread 3kg. นูเทลล่า 3 กก. แบบถัง BBE : 01/2024 ( Nutella 3 kg x 2 ถัง )'
         // ให้ค้นหา index ที่อยู่ทางซ้ายหรือขวาของ foundUnitIndex
@@ -280,10 +317,10 @@
                 }
             }
         }
-        if (configDebug.lookingForUnitInName) console.log("index", nameArray[foundUnitIndex])
+        if (configDebug.lookingForUnitInName) console.log("index", foundUnitIndex, nameArray[foundUnitIndex])
         if (foundUnitIndex == -1) {
-            if (configDebug.lookingForUnitInName) console.log("ไม่เจอหน่วย")
-            return { value, unit };
+            if (configDebug.lookingForUnitInName) console.log("return-->","ไม่เจอหน่วย")
+            return { _value:value, _unit:unit };
         }
         // ถ้ายังไม่เจอให้ค้นหาใน foundUnitIndex ของง nameArray[foundUnitIndex] นั้นโดยหาทางซ้ายก่อนหรือขวา
         // จะเจอเป็นตัวเลข เช่น 300g
@@ -311,13 +348,39 @@
                 }
             }
         }
+
+        if (!isFound) {
+            // pattern string
+            if (configDebug.lookingForUnitInName) console.log("ไม่เจอหน่วย ใช้ pattern string")
+            for (const key in unitOfProduct) {
+                // /\bkey\b/
+                let match = name.match(new RegExp(`\\b${key}\\b`, "gi"));
+                if (match) {
+                    unit = key;
+                    // string.slice(match.index + 1).match(/\d+/)[0];
+                    let number = name.slice(match.index + 1).match(/\d+/)[0]
+                    if (number) {
+                        value = ParseIntOrFloat(number);
+                        isFound = true;
+                    }
+                    if (!isFound) {
+                        number = name.slice(match.index - 1).match(/\d+/)[0]
+                        if (number) {
+                            value = ParseIntOrFloat(number);
+                            isFound = true;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
         if (isFound) {
             value = ParseIntOrFloat(value);
         }
 
 
-        if (configDebug.lookingForUnitInName) console.log(value, unit, nameArray)
-        return { value, unit };
+        if (configDebug.lookingForUnitInName) console.log("return-->",value, unit, nameArray)
+        return { _value:value, _unit:unit };
     }
     function isNumber(str) {
         return !isNaN(str);
@@ -364,7 +427,7 @@
         }
     }
     // clear console
-    console.clear();
+    // console.clear();
     PRODUCTS.sort((a, b) => a.avg - b.avg);
     console.table(PRODUCTS)
     if (configDebug.beatifulPrice) {
